@@ -18,43 +18,50 @@ pub struct WBDGraph {
 
 // Specialized tuples typed for csv serde to unpack the large_twitch_features.csv
 type TwitchItem = (
-    u64,    // .0 views
+    u32,    // .0 views
     bool,   // .1 mature
-    u64,    // .2 life_time
+    u32,    // .2 life_time
     String, // .3 created_at
     String, // .4 updated_at
-    u64,    // .5 numeric_id
+    u32,    // .5 numeric_id
     bool,   // .6 dead_account
     String, // .7 language
     bool,   // .8 affiliate
 );
 
 impl GeoPoint {
-    pub fn new(id: u64, x: u64, y: u64) -> Self {
+    pub fn new(id: u32, x: u32, y: u32) -> Self {
         GeoPoint {
             id: id,
             x: x,
             y: y,
-            neighbors: Vec::<u64>::with_capacity(0),
+            neighbors: Vec::<u32>::with_capacity(0),
+            weights: Vec::<u32>::with_capacity(0),
         }
     }
 
-    pub fn add_neighbor(&mut self, neighbor: u64) {
-        self.neighbors.push(neighbor);
-    }
-
-    pub fn distance_to(&self, other: &GeoPoint) -> u64 {
-        let xx = if self.x > other.x {
-        	(self.x - other.x) * (self.x - other.x)
+    pub fn distance_to(&self, other: &GeoPoint) -> u32 {
+    	let selfx : u64 = self.x as u64;
+    	let otherx : u64 = other.x as u64;
+    	let selfy : u64 = self.y as u64;
+    	let othery : u64 = other.y as u64;
+        let xx = if selfx > otherx {
+        	(selfx - otherx) * (selfx - otherx)
     	} else {
-			(other.x - self.x) * (other.x - self.x)
+			(otherx - selfx) * (otherx - selfx)
     	};
-        let yy = if self.y > other.y {
-        	(self.y - other.y) * (self.y - other.y)
+        let yy = if selfy > othery {
+        	(selfy - othery) * (selfy - othery)
         } else {
-			(other.y - self.y) * (other.y - self.y)
+			(othery - selfy) * (othery - selfy)
         };
-        ((xx + yy) as f64).sqrt().floor() as u64
+        let overmax = ((xx + yy) as f64).sqrt().floor() as u64;
+        if overmax > u32::MAX.into() {
+			return u32::MAX
+        }
+        else {
+			overmax as u32
+        }
     }
 }
 
@@ -79,12 +86,12 @@ impl WBDGraph {
 		for result in rdr.records().skip(1) {
 			let record = result?;
 			let line = record.get(0).unwrap().split(',').collect::<Vec<&str>>();
-			let id : u64 = line[5].parse()?;
+			let id : u32 = line[5].parse()?;
 			if (id as usize) != newgraph.points.len() {
 				panic!("CSV records are misaligned");
 			}
-			let x : u64 = line[0].parse()?;
-			let y : u64 = line[2].parse()?;
+			let x : u32 = line[0].parse()?;
+			let y : u32 = line[2].parse()?;
 			newgraph.points.push(GeoPoint::new(id, x, y));			
 		}
 
@@ -104,6 +111,8 @@ impl WBDGraph {
             let weight = newgraph.points[src].distance_to(&newgraph.points[dst]);
             newgraph.points[src].neighbors.push(dst.try_into().unwrap());
             newgraph.points[dst].neighbors.push(src.try_into().unwrap());
+            newgraph.points[src].weights.push(weight.clone());
+            newgraph.points[dst].weights.push(weight);
         }
 
         // Return
