@@ -72,8 +72,8 @@ The program will print out when it begins loading in a specific file.
 
 Then, I run a single DFS iteration on Node 49, and the relevant statistics are displayed.
 
-Finally, the program runs DFS iterations on 5 thousand random nodes, dumping the statistics
-to a file in the working directory called `mnm.csv`. This is slow. I did my best to make it faster.
+Finally, the program runs DFS iterations on 10 thousand random nodes, dumping the statistics
+to a file in the working directory called `mnm.csv`. This is slow, about 10 minutes. I did my best to make it faster.
 
 You can check on progress by running (on a Linux machine) `wc mnm.csv`; the first output number from wc is the number of lines in a file, which is out of 10k.
 
