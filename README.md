@@ -23,6 +23,8 @@ If we set the maximum "distance" to 4, we can observe that:
 
 Therefore, we can say either A or D has 2 neighboring cities.
 
+The idea came from [here](https://www.geeksforgeeks.org/problems/city-with-the-smallest-number-of-neighbors-at-a-threshold-distance/1?page=1&category%5B%5D=Disjoint+Set&sortBy=submissions) but my version is modified to be applied to a much larger datset... also I'm not really following their algorithm verbatim.
+
 ## Implementation ##
 
 In my implementation, I use Depth First Search to traverse the graph. The function `dfs_maxdepth_minneighbors()` returns the node
