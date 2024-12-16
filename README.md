@@ -63,6 +63,7 @@ If you do NOT specify any arguments, the program will default to `./twitch_gamer
 
 Reducing the value of K does not necessarily speed up the algorithm.
 
+
 ## Expected Output ##
 
 If you don't add arguments, the program will notify you of this and show a brief help.
@@ -72,4 +73,8 @@ The program will print out when it begins loading in a specific file.
 Then, I run a single DFS iteration on Node 49, and the relevant statistics are displayed.
 
 Finally, the program runs DFS iterations on 5 thousand random nodes, dumping the statistics
-to a file in the working directory. This is slow. I did my best to make it faster.
+to a file in the working directory called `mnm.csv`. This is slow. I did my best to make it faster.
+
+You can check on progress by running (on a Linux machine) `wc mnm.csv`; the first output number from wc is the number of lines in a file, which is out of 10k.
+
+You may find the output a little odd if you run with a depth threshhold of 6000 or less; it seems that the origin nodes for DFS are also the least connected. This is because the nodes with higher numbers of connections are also more likely to have higher distances, based on this particular dataset.

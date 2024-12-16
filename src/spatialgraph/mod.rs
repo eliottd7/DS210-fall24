@@ -74,8 +74,7 @@ impl WBDGraph {
         maxdepth: usize,
         currdepth: usize,
     ) -> usize {
-    
-        let _ = self.visited.insert(node);
+        
 		let mut point = self.points[node].clone();
 
         // if the current node has no neighbors, it is the min!
@@ -90,13 +89,19 @@ impl WBDGraph {
 		for neigh_ix in 0..neighbors.len() {
 			let neighbor = neighbors[neigh_ix];
 
+			// we don't want to keep spinning between connected nodes
+			if self.visited.contains(&neighbor) {
+				continue;
+			}
+			self.visited.insert(neighbor);
+
 			// do not exceed the maximum depth
 			let newdepth = currdepth + point.weights()[neigh_ix];
 			if newdepth > maxdepth {
 				continue;
 			}
 
-			// dfs call
+			// recursive call
 			let neighbor_with_min = self.dfs_maxdepth_minneighbors(
 				neighbor.clone(),
 				maxdepth,

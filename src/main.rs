@@ -2,6 +2,7 @@ mod spatialgraph;
 use spatialgraph::WBDGraph;
 use std::env;
 use std::thread;
+use rand::prelude::*;
 
 fn main() {
     let mut nodes_csv_path = String::from("./twitch_gamers/large_twitch_features.csv");
@@ -25,8 +26,8 @@ fn main() {
                 panic!("{e}")
             }
         };
-
-    assert_eq!(graph.points().len(), 168114);
+    let graph_max = graph.points().len();
+    assert_eq!(graph_max, 168114);
 
     let node_with_min_neighbors = graph.dfs_maxdepth_minneighbors(49usize, 3000, 0usize);
     let visits = graph.check_visits();
@@ -38,28 +39,29 @@ fn main() {
             .len()
     );
     println!("(Visited {} nodes to confirm this)", visits);
+    assert_eq!(node_with_min_neighbors, 25309);
     graph.clear_visits();
+    assert_eq!(graph.check_visits(), 0);
 
-    println!("Dumping min neighbors to working directory");
+    println!("Dumping 10k random min neighbors to working directory");
     let mut wtr = csv::WriterBuilder::new()
-        .from_path("./minimum_neighbors_map.csv")
+        .from_path("./mnm.csv")
         .unwrap();
-    let _ = wtr.write_record(["origin", "min_neighbors_node", "count"]);
-
-	let progress_max = graph.points().len();
-    for ix in 0..graph.points().len() {
-    	if ix % 100 == 0 {
-			println!("Progress {ix} / {progress_max}");
-    	}
-        let mut _mnn: usize = usize::MAX;
+    match wtr.write_record(["origin_node", "min_neighbors_node", "count"]) {
+		Ok(_) => (),
+		Err(e) => {panic!("{}", e)},
+    }
+    for _ in 0..10000 {
+		let ix : usize = rand::random::<usize>() % graph_max;
+        let mut mnn: usize = usize::MAX;
         let mut borrow_graph = graph.clone();
-        thread::spawn(move || {
-            _mnn = borrow_graph.dfs_maxdepth_minneighbors(ix, max_dfs_depth.clone(), 0usize);
-        });
-        let _ = wtr.write_record([
+        mnn = borrow_graph.dfs_maxdepth_minneighbors(ix, max_dfs_depth.clone(), 0usize);
+        let svc = vec![
             ix.clone().to_string(),
-            _mnn.clone().to_string(),
-            _mnn.to_string(),
-        ]);
+            mnn.clone().to_string(),
+			graph.points().clone()[mnn].neighbors().len().to_string(),
+        ];
+        let _ = wtr.write_record(svc);
+        graph.clear_visits();
     }
 }
