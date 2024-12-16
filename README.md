@@ -77,4 +77,6 @@ to a file in the working directory called `mnm.csv`. This is slow, about 10 minu
 
 You can check on progress by running (on a Linux machine) `wc mnm.csv`; the first output number from wc is the number of lines in a file, which is out of 10k.
 
-You may find the output a little odd if you run with a depth threshhold of 6000 or less; it seems that the origin nodes for DFS are also the least connected. This is because the nodes with higher numbers of connections are also more likely to have higher distances, based on this particular dataset.
+You may find the output a little odd if you run with a depth threshhold of 6000 or less; it seems that many of the origin nodes for DFS are also less connected. This is because the nodes with higher numbers of connections are also more likely to have higher distances and therefore exceed the threshold (see last paragraph). It is worth running this with a much higher threshold at the expense of waiting longer to see that, at depth values over 12000, the same nodes start appearing as the min-neighbor winners with less than 5 connections. On my laptop this took over an hour so I don't recommend unless you're that bored.
+
+The Twitch Gamers dataset edges are follows between users. However, the nature of the platform itself lends that more followers implies more views, which is one of the fields used in calculating the weight of a node. So increased connectivity is highly correlated to increased weights along all edges.
